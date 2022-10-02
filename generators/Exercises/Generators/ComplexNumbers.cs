@@ -19,8 +19,8 @@ namespace Exercism.CSharp.Exercises.Generators
             testMethod.Expected = ConvertToType(testMethod.Expected);
 
             var constructorParamName = testMethod.Input.ContainsKey("z") ? "z" : "z1";
-            testMethod.Input["real"] = ConvertToDouble(testMethod.Input[constructorParamName][0]);
-            testMethod.Input["imaginary"] = ConvertToDouble(testMethod.Input[constructorParamName][1]);
+            testMethod.Input["real"] = ConvertToDouble(testMethod.Input[constructorParamName], 0);
+            testMethod.Input["imaginary"] = ConvertToDouble(testMethod.Input[constructorParamName], 1);
 
             testMethod.InputParameters = GetInputParameters(testMethod, constructorParamName);
             testMethod.ConstructorInputParameters = new[] {"real", "imaginary"};
@@ -62,12 +62,21 @@ namespace Exercism.CSharp.Exercises.Generators
 
         private static bool IsComplexNumber(object rawValue) => rawValue is int[] || rawValue is double[] || rawValue is float[] || rawValue is JArray;
 
+        private static object ConvertToDouble(dynamic value, int index) =>
+            value switch 
+            {
+                int i => ConvertToDouble(i),
+                _ => ConvertToDouble(value[index])
+            };
+        
         private static object ConvertToDouble(dynamic value) =>
             value.ToString() switch
             {
                 "e" => new UnescapedValue("Math.E"),
                 "pi" => new UnescapedValue("Math.PI"),
                 "ln(2)" => new UnescapedValue("Math.Log(2.0)"),
+                "ln(2)/2" => new UnescapedValue("Math.Log(2.0)/2.0"),
+                "pi/4" => new UnescapedValue("Math.PI/4.0"),
                 _ => double.Parse(value.ToString())
             };
 
